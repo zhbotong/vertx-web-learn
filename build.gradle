@@ -1,0 +1,65 @@
+plugins {
+  id 'java'
+  id 'application'
+  id 'com.github.johnrengelman.shadow' version '5.0.0'
+}
+
+group = 'cn.dippers'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+  mavenCentral()
+}
+
+ext {
+  vertxVersion = '4.0.0-milestone4'
+  junitJupiterEngineVersion = '5.4.0'
+  jacksonVersion = '2.9.9'
+}
+
+application {
+  mainClassName = 'io.vertx.core.Launcher'
+}
+
+sourceCompatibility = '11'
+
+def mainVerticleName = 'cn.dippers.MainVerticle'
+def watchForChange = 'src/**/*'
+def doOnChange = './gradlew classes'
+
+dependencies {
+  implementation "io.vertx:vertx-config:$vertxVersion"
+  implementation "io.vertx:vertx-web:$vertxVersion"
+  implementation "io.vertx:vertx-mysql-client:$vertxVersion"
+  implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+  implementation "com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
+  implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
+  implementation "io.vertx:vertx-codegen:$vertxVersion"
+  runtime "ch.qos.logback:logback-classic:1.2.3"
+  testImplementation "io.vertx:vertx-junit5:$vertxVersion"
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterEngineVersion"
+  testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterEngineVersion"
+}
+
+
+shadowJar {
+  classifier = 'fat'
+  manifest {
+    attributes 'Main-Verticle': mainVerticleName
+  }
+  mergeServiceFiles {
+    include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+  }
+}
+
+test {
+  useJUnitPlatform()
+  testLogging {
+    events 'PASSED', 'FAILED', 'SKIPPED'
+  }
+}
+
+run {
+  args = ['run', mainVerticleName, "--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
+}

@@ -1,0 +1,17 @@
+{
+  "server": {
+    "port": 8080
+  },
+  "db": {
+    "connect": {
+      "host": "localhost",
+      "port": 3306,
+      "user": "root",
+      "password": "845483926",
+      "database": "web"
+    },
+    "pool": {
+      "maxSize": 5
+    }
+  }
+}
