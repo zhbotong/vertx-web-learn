@@ -21,18 +21,7 @@ public class DipperLauncher extends Launcher {
 
   @Override
   public void beforeDeployingVerticle(DeploymentOptions deploymentOptions) {
-
-    //配置文件读取
-    ConfigRetrieverOptions options = new ConfigRetrieverOptions();
-    ConfigStoreOptions storeOptions = new ConfigStoreOptions();
-    storeOptions.setType("file").setConfig(new JsonObject().put("path","config.json"));
-    options.addStore(storeOptions);
-    ConfigRetriever configRetriever = ConfigRetriever.create(Vertx.vertx(),options);
-    Future<JsonObject> config = configRetriever.getConfig();
-    config.onSuccess(result -> {
-      deploymentOptions.setConfig(result);
-      super.beforeDeployingVerticle(deploymentOptions);
-    });
+    super.beforeDeployingVerticle(deploymentOptions);
   }
 
   @Override

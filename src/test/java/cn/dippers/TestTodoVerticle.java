@@ -36,14 +36,8 @@ public class TestTodoVerticle {
   private static final String url = "http://localhost:8080/todo";
   @BeforeEach
   void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    ConfigRetrieverOptions options = new ConfigRetrieverOptions();
-    ConfigStoreOptions storeOptions = new ConfigStoreOptions();
-    storeOptions.setType("file").setConfig(new JsonObject().put("path","config.json"));
-    options.addStore(storeOptions);
-    ConfigRetriever configRetriever = ConfigRetriever.create(Vertx.vertx(),options);
-    configRetriever.getConfig(testContext.succeeding(result -> {
-      vertx.deployVerticle(new TodoVerticle(),new DeploymentOptions().setConfig(result),testContext.succeeding(id -> testContext.completeNow()));
-    }));
+
+    vertx.deployVerticle(new MainVerticle(),testContext.succeeding(id -> testContext.completeNow()));
     ObjectMapper mapper = DatabindCodec.mapper();
     ObjectMapper objectMapper = DatabindCodec.prettyMapper();
     List<Module> modules = Arrays.asList(new ParameterNamesModule(), new Jdk8Module(), new JavaTimeModule());

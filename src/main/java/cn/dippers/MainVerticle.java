@@ -19,10 +19,20 @@ import java.util.List;
 public class MainVerticle  extends AbstractVerticle{
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
+
+    //配置文件读取
+    ConfigRetrieverOptions options = new ConfigRetrieverOptions();
+    ConfigStoreOptions storeOptions = new ConfigStoreOptions();
+    storeOptions.setType("file").setConfig(new JsonObject().put("path","config.json"));
+    options.addStore(storeOptions);
+    ConfigRetriever configRetriever = ConfigRetriever.create(Vertx.vertx(),options);
+    Future<JsonObject> future = configRetriever.getConfig();
+    future.onSuccess(result -> {
       vertx
-        .deployVerticle(new TodoVerticle())
+        .deployVerticle(new TodoVerticle(),new DeploymentOptions().setConfig(result))
         .onSuccess(sucess -> startPromise.complete())
         .onFailure(Throwable::printStackTrace)
         .onFailure(fail -> startPromise.fail(fail));
+    });
   }
 }
