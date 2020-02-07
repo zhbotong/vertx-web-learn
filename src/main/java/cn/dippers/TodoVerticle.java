@@ -15,6 +15,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.LoggerHandler;
+import io.vertx.ext.web.handler.ResponseContentTypeHandler;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.mysqlclient.MySQLPool;
 import io.vertx.sqlclient.*;
@@ -34,8 +35,8 @@ public class TodoVerticle extends AbstractVerticle {
     enableCors(router);
     router.route().handler(BodyHandler.create());
     router.route().handler(LoggerHandler.create());
+    router.route().produces("application/json").handler(ResponseContentTypeHandler.create());
     router.get("/todo").handler(this::todoList);
-
     router.post("/todo").handler(this::addTodo);
     router.patch("/todo").handler(this::updateTodo);
     router.delete("/todo/:id").handler(this::deleteTodo);
@@ -60,20 +61,19 @@ public class TodoVerticle extends AbstractVerticle {
     String id = routingContext.pathParam("id");
      client.preparedQuery("DELETE FROM todo WHERE id=?",Tuple.of(id))
        .onSuccess(res ->  ResponseUtil.ok(response))
-       .onFailure(Throwable::printStackTrace)
-       .onFailure(res -> ResponseUtil.fail(response));
+       .onFailure(res -> routingContext.fail(res));
   }
 
   //修改待办事项
   private void updateTodo(RoutingContext routingContext) {
+
     HttpServerResponse response = routingContext.response();
     Todo todo = routingContext.getBodyAsJson().mapTo(Todo.class);
     SqlTemplate sqlTemplate = SqlTemplate.create(client,"UPDATE todo SET content=:content WHERE id=:id");
     sqlTemplate
       .query(Todo.class,todo)
       .onSuccess(res ->  ResponseUtil.ok(response))
-      .onFailure(Throwable::printStackTrace)
-      .onFailure(res -> ResponseUtil.fail(response));
+      .onFailure(res -> routingContext.fail(res));
   }
 
   //添加待办事项
@@ -88,9 +88,7 @@ public class TodoVerticle extends AbstractVerticle {
     listFuture
       .compose(res -> template.query(Todo.class, null))
       .onSuccess(res ->  ResponseUtil.ok(response,Json.encode(res.get(0))))
-      .onFailure(Throwable::printStackTrace)
-      .onFailure(res -> ResponseUtil.fail(response));
-
+      .onFailure(res -> routingContext.fail(res));
   }
 
   // 待办列表
@@ -99,8 +97,7 @@ public class TodoVerticle extends AbstractVerticle {
     Future<List<Todo>> resultFuture = sqlTemplate.query(Todo.class, null);
     HttpServerResponse response = routingContext.response();
     resultFuture.onSuccess(result -> ResponseUtil.ok(response,Json.encode(result)));
-    resultFuture.onFailure(Throwable::printStackTrace);
-    resultFuture.onFailure(result -> ResponseUtil.fail(response));
+    resultFuture.onFailure(res -> routingContext.fail(res));
   }
 
   /**
