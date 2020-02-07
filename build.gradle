@@ -18,7 +18,7 @@ ext {
 }
 
 application {
-  mainClassName = 'io.vertx.core.Launcher'
+  mainClassName = 'cn.dippers.DipperLauncher'
 }
 
 sourceCompatibility = '11'
