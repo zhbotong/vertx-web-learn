@@ -25,7 +25,7 @@ public class MainVerticle  extends AbstractVerticle{
     ConfigStoreOptions storeOptions = new ConfigStoreOptions();
     storeOptions.setType("file").setConfig(new JsonObject().put("path","config.json"));
     options.addStore(storeOptions);
-    ConfigRetriever configRetriever = ConfigRetriever.create(Vertx.vertx(),options);
+    ConfigRetriever configRetriever = ConfigRetriever.create(vertx,options);
     Future<JsonObject> future = configRetriever.getConfig();
     future.onSuccess(result -> {
       vertx
